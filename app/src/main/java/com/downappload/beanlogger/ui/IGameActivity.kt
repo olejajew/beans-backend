@@ -16,4 +16,5 @@ interface IGameActivity {
 
     fun getContext(): Context
 
+    fun clearSessionRequest()
 }

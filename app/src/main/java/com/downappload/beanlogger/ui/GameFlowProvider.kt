@@ -1,5 +1,7 @@
 package com.downappload.beanlogger.ui
 
+import android.util.Log
+import com.downappload.beanlogger.AppClass
 import com.downappload.beanlogger.data.Player
 import com.downappload.beanlogger.ui.components.ActionWidgetComponent
 import com.downappload.beanlogger.ui.components.BaseComponent
@@ -25,8 +27,15 @@ class GameFlowProvider(
             ActionType.get -> iGetBeans(player)
             ActionType.give -> iGiveBeans(player)
             ActionType.look_at_field -> lookAtField(player)
+            ActionType.clear_session -> {
+                iGameActivity.clearSessionRequest()
+                null
+            }
             ActionType.step_end -> {
                 gameProvider.stepEnd(player)
+                AppClass.getInstance().showToast(
+                    "Ход игрока ${gameProvider.getActivePlayer().name}"
+                )
                 null
             }
         } ?: return iGameActivity.restartFlow()
@@ -40,7 +49,7 @@ class GameFlowProvider(
         ) { beansToSet ->
             iGameActivity.setComponent(
                 FieldComponent(
-                    "Высаживает на...",
+                    player,
                     gameProvider.notHavePlaceFor(
                         player, beansToSet
                     ).count(),
@@ -54,7 +63,7 @@ class GameFlowProvider(
     }
 
     private fun cropField(player: Player): BaseComponent {
-        return FieldComponent("Я срезаю", 3, iGameActivity) { choicedFields ->
+        return FieldComponent(player, 3, iGameActivity) { choicedFields ->
             gameProvider.playerCropField(player, choicedFields)
             iGameActivity.restartFlow()
         }
@@ -83,14 +92,14 @@ class GameFlowProvider(
                         BeanPaletteComponent("${heIs.name} отдает...", iGameActivity) { heGive ->
                             iGameActivity.setComponent(
                                 FieldComponent(
-                                    "${iAm.name} высаживает на...",
+                                    iAm,
                                     iGameActivity.getGameProvider()
                                         .notHavePlaceFor(iAm, heGive).size,
                                     iGameActivity
                                 ) { myFieldsToCrop ->
                                     iGameActivity.setComponent(
                                         FieldComponent(
-                                            "${heIs.name} высаживает на...",
+                                            heIs,
                                             iGameActivity.getGameProvider()
                                                 .notHavePlaceFor(heIs, iGive).size,
                                             iGameActivity
@@ -123,7 +132,7 @@ class GameFlowProvider(
                         ReasonComponent("Так как... ", iGameActivity) { reason ->
                             iGameActivity.setComponent(
                                 FieldComponent(
-                                    "${heIs.name} готов срезать...",
+                                    heIs,
                                     iGameActivity.getGameProvider().notHavePlaceFor(heIs, iGive)
                                         .count(),
                                     iGameActivity
@@ -148,7 +157,7 @@ class GameFlowProvider(
                         ReasonComponent("Так как... ", iGameActivity) { reason ->
                             iGameActivity.setComponent(
                                 FieldComponent(
-                                    "${iAm.name} готов срезать...",
+                                    iAm,
                                     iGameActivity.getGameProvider().notHavePlaceFor(iAm, heGives)
                                         .count(),
                                     iGameActivity

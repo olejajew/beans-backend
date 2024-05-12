@@ -15,9 +15,9 @@ class DumpSaver(private val gameProvider: GameProvider, private val context: Con
 
     private val sharedPreferences = context.getSharedPreferences("game_dump", Context.MODE_PRIVATE)
 
-    fun createDump() {
+    fun createDump(): String? {
         if (gameProvider.getPlayers().isEmpty()) {
-            return
+            return null
         }
         val activePlayer = gameProvider.getActivePlayer()
         val playerWrappers = gameProvider.playerWrappers.values
@@ -26,6 +26,7 @@ class DumpSaver(private val gameProvider: GameProvider, private val context: Con
         val string = gson.toJson(dump)
         Log.i("dump.create():", string)
         sharedPreferences.edit().putString(LAST_SAVE, string).apply()
+        return string
     }
 
     fun getDump(): Dump? {
@@ -34,6 +35,10 @@ class DumpSaver(private val gameProvider: GameProvider, private val context: Con
             return null
         }
         return gson.fromJson(dumpString, Dump::class.java)
+    }
+
+    fun deleteOldDumps() {
+        sharedPreferences.edit().clear().apply()
     }
 
 }

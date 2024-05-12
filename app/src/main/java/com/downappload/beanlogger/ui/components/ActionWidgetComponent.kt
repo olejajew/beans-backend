@@ -20,7 +20,7 @@ class ActionWidgetComponent(
         listOf(ActionType.set_beans),
         listOf(ActionType.exchange),
         listOf(ActionType.get, ActionType.give),
-        listOf(ActionType.look_at_field, ActionType.step_end)
+        listOf(ActionType.clear_session, ActionType.look_at_field, ActionType.step_end)
     )
 
     override fun getView(player: Player): View {

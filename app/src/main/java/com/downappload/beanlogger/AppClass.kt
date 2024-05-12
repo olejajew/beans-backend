@@ -11,7 +11,7 @@ class AppClass : Application() {
     }
 
     fun showToast(text: String){
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
     }
 
     companion object{

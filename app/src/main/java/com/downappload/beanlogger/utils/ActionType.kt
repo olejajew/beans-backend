@@ -8,7 +8,8 @@ enum class ActionType(val title: String, val color: String, val textColor: Strin
     get("Получает", "#2196F3", "#ffffff"),
     give("Отдает", "#673AB7", "#ffffff"),
     look_at_field("Посмотреть поле", "#795548", "#ffffff"),
-    step_end("Закончил", "#B71C1C", "#ffffff")
+    step_end("Закончил", "#B71C1C", "#ffffff"),
+    clear_session("ОЧИСТИТЬ СЕССИЮ", "#000000", "#ffffff")
 
     //buy_third_field("Покупает поле"),
 

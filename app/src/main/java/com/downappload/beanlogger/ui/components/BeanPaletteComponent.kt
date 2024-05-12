@@ -16,10 +16,10 @@ class BeanPaletteComponent(
     private val selectedBeans = hashMapOf<Bean, Int>()
 
     private val palette = listOf(
-        listOf(Bean.CacaoBean, Bean.GardenBean),
-        listOf(Bean.RedBean, Bean.BlackEyedBean, Bean.SoyBean),
-        listOf(Bean.GreenBean, Bean.StinkBean, Bean.ChilliBean),
-        listOf(Bean.BlueBean, Bean.WaxBean, Bean.CoffeeBean)
+        listOf(Bean.CacaoBean, Bean.GardenBean, Bean.RedBean),
+        listOf(Bean.BlackEyedBean, Bean.SoyBean, Bean.GreenBean),
+        listOf(Bean.StinkBean, Bean.ChilliBean, Bean.BlueBean, ),
+        listOf(Bean.WaxBean, Bean.CoffeeBean, null)
     )
 
     override fun getView(player: Player): View {
@@ -27,7 +27,11 @@ class BeanPaletteComponent(
         palette.forEach { row ->
             val rowLayout = createEmptyLinearLayout(LinearLayout.HORIZONTAL)
             row.forEach {
-                rowLayout.addView(createBeanCard(it))
+                if(it != null) {
+                    rowLayout.addView(createBeanCard(it))
+                } else {
+                    rowLayout.addView(createEmptyFrameLayout())
+                }
             }
             linearLayout.addView(rowLayout)
         }

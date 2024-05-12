@@ -9,6 +9,7 @@ import com.downappload.beanlogger.data.PlayerWrapper
 import com.downappload.beanlogger.data.Reason
 import com.downappload.beanlogger.data.database.DatabaseAdapter
 import com.downappload.beanlogger.data.database.entities.LogEntity
+import com.downappload.beanlogger.data.rest.ApiLogger
 import com.downappload.beanlogger.utils.dumps.Dump
 import com.downappload.beanlogger.utils.dumps.DumpSaver
 import com.google.gson.Gson
@@ -37,7 +38,7 @@ class GameProvider(context: Context) {
 
     fun startGame() {
         val dump = dumpSaver.getDump()
-        if(dump != null){
+        if (dump != null) {
             restoreGame(dump)
         } else {
             defaultInit()
@@ -71,9 +72,14 @@ class GameProvider(context: Context) {
     private fun broadcast(
         pair: Map<String, Any>,
     ) {
-        Log.e("!!!", pair.toString())
-        databaseAdapter.getLogDao().saveLog(LogEntity(data = gson.toJson(pair)))
-        dumpSaver.createDump()
+        Log.i("broadcast()", pair.toString())
+        val messageString = gson.toJson(pair)
+        databaseAdapter.getLogDao().saveLog(LogEntity(data = messageString))
+        ApiLogger.saveLog(messageString)
+        val dump = dumpSaver.createDump()
+        if (dump != null) {
+            ApiLogger.saveDump(gson.toJson(dump))
+        }
     }
 
     fun getFields(player: Player) = playerWrappers[player.id]!!.fields
@@ -96,6 +102,7 @@ class GameProvider(context: Context) {
                         broadcast(
                             mapOf(
                                 "action" to ActionType.set_beans,
+                                "player" to player,
                                 "fieldIndex" to setToHisField,
                                 "supData" to (t to u)
                             )
@@ -108,6 +115,7 @@ class GameProvider(context: Context) {
                             mapOf(
                                 "action" to ActionType.set_beans,
                                 "fieldIndex" to field.index,
+                                "player" to player,
                                 "supData" to (t to u)
                             )
                         )
@@ -115,8 +123,9 @@ class GameProvider(context: Context) {
                 }
 
             }
-        } catch (e: Exception){
-            AppClass.getInstance().showToast("Ошибка. У ${player.name} мало полей для посадки: ${fieldsForCrop.size}")
+        } catch (e: Exception) {
+            AppClass.getInstance()
+                .showToast("Ошибка. У ${player.name} мало полей для посадки: ${fieldsForCrop.size}")
             e.printStackTrace()
         }
     }
@@ -130,8 +139,9 @@ class GameProvider(context: Context) {
                     mapOf(
                         "action" to ActionType.crop_field,
                         "fieldIndex" to field.index,
-                        "supData" to (bean to count)
-                    )
+                        "supData" to (bean to count),
+                        "player" to player,
+                        )
                 )
                 this.clear()
             }
@@ -203,7 +213,7 @@ class GameProvider(context: Context) {
 
         broadcast(
             mapOf(
-                "action" to ActionType.give,
+                "action" to ActionType.get,
                 "iAm" to iAm.name,
                 "iGive" to heGive,
                 "heIs" to heIs,
@@ -216,7 +226,8 @@ class GameProvider(context: Context) {
         broadcast(
             mapOf(
                 "action" to ActionType.open_cards,
-                "beans" to bean
+                "beans" to bean,
+                "player" to player
             )
         )
     }
@@ -232,6 +243,14 @@ class GameProvider(context: Context) {
                 "count" to gotCards
             )
         )
+    }
+
+    fun clearSession() {
+        dumpSaver.deleteOldDumps()
+        defaultInit()
+        activePlayerProvider.setActivePlayer(0)
+        broadcast(mapOf("action" to "drop_and_new_game"))
+
     }
 
 }
